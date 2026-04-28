@@ -140,10 +140,12 @@ Annotated layout of `mtd0.bin`:
 | 0x10   | 4    | sdram ncdl                      | `0x00000000`   |
 | 0x14   | …    | NUL-terminated `key=value` defaults | text       |
 
-The CRC algorithm is the **standard Broadcom NVRAM CRC-8** (poly 0x07,
-init 0xff, table-driven, reflection off). It is computed over byte 9
-through the end of the declared length. I verified the formula by
-recomputing on the unmodified image and matching the stored `0xa9`.
+The CRC algorithm is the **Broadcom NVRAM CRC-8 (`hndcrc8`)** — reflected
+form, reflected polynomial `0xab`, init `0xff`, no xor-out. It is computed
+over byte 9 through the end of the declared length. I verified the formula
+by recomputing on the unmodified image and matching the stored `0xa9`,
+and again on the patched image (`0xe5`). The exact implementation lives in
+[tools/patch_cfe_clkfreq.py](../tools/patch_cfe_clkfreq.py).
 
 ### 4.2 NVRAM defaults inventory
 
@@ -276,7 +278,9 @@ power-cycles.
 ssh router 'dd if=/dev/mtd0 bs=65536' > mtd0.bin
 
 # 2. Patch (Python). Reads mtd0.bin, writes mtd0.patched.bin.
-#    See script committed in tools/ for the exact CRC-8 table & logic.
+python3 tools/patch_cfe_clkfreq.py mtd0.bin mtd0.patched.bin
+# Or with custom values:
+#   python3 tools/patch_cfe_clkfreq.py mtd0.bin mtd0.patched.bin --new 1200,800
 
 # 3. Stage on router and verify md5.
 scp mtd0.patched.bin router:/jffs/
