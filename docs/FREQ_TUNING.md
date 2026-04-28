@@ -62,10 +62,10 @@ write, both stored under [firmware/mtd_backup/](firmware/mtd_backup/):
 
 ```
 firmware/mtd_backup/
-├── 20260428_133413/        # first complete dump
+├── <timestamp1>/        # first complete dump
 │   ├── MD5SUMS
 │   ├── mtd0.bin … mtd5.bin
-└── 20260428_141712/        # second dump, used as working copy
+└── <timestamp2>/        # second dump, used as working copy
     ├── VERIFIED.md
     ├── mtd0.bin … mtd5.bin
     └── mtd4.bin.first       # second mtd4 read (NAND view, non-stable)
@@ -201,7 +201,7 @@ Result:
 | Bytes differing | —                                    | 1 483 (all inside the FLSH region)    |
 
 The patched image is checked into
-[firmware/mtd_backup/20260428_141712/mtd0.patched.bin](firmware/mtd_backup/20260428_141712/mtd0.patched.bin).
+[firmware/mtd_backup/<timestampt>/mtd0.patched.bin](firmware/mtd_backup/<timestamp>/mtd0.patched.bin).
 
 ## 6. Flashing 📸 — the gotchas
 
@@ -307,19 +307,8 @@ ssh router 'reboot'
   available — but this does **not** cover CFE itself. CFE recovery
   would require working JTAG.
 - Rollback: write the verified
-  [firmware/mtd_backup/20260428_141712/mtd0.bin](firmware/mtd_backup/20260428_141712/mtd0.bin)
+  [firmware/mtd_backup/<timestampt>/mtd0.bin](firmware/mtd_backup/<timestamp>/mtd0.bin)
   back to `/dev/mtdblock0` exactly as the patched image was written.
-
-## 10. Outstanding ideas
-
-- DDR @ 800 MHz is conservative for this generation — try `clkfreq=
-  1200,800` or `1200,533` after a thermal margin check.
-- Re-derive the same patch script for the live nvram partition
-  (`mtd1`), so even non-default factory units pick up the new value
-  without a CFE flash.
-- Add a Tools_Sysinfo.asp section that surfaces the live `clkfreq`
-  read-out (the earlier in-session attempt was reverted; the data is
-  trivially available via `nvram get`).
 <!--
                                 .:xxxxxxxx:.
                              .xxxxxxxxxxxxxxxx.
